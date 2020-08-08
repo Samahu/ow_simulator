@@ -5,13 +5,11 @@
 #ifndef FaultInjector_h
 #define FaultInjector_h
 
-
 #include <ros/ros.h>
 #include <ow_faults/FaultsConfig.h>
 #include <ow_lander/lander_joints.h>
 #include <sensor_msgs/JointState.h>
 #include <unordered_map>
-
 
 // This class injects simple message faults that don't need to be simulated
 // at their source. Modified topics are prefixed with "/faults". This could be
@@ -24,7 +22,9 @@ class FaultInjector
 {
 public:
   FaultInjector(ros::NodeHandle node_handle);
-  ~FaultInjector(){}
+  ~FaultInjector()
+  {
+  }
 
   void faultsConfigCb(ow_faults::FaultsConfig& faults, uint32_t level);
 
@@ -35,7 +35,7 @@ private:
 
   // Find an item in an std::vector or other find-able data structure, and
   // return its index. Return -1 if not found.
-  template<typename group_t, typename item_t>
+  template <typename group_t, typename item_t>
   int findPositionInGroup(const group_t& group, const item_t& item);
 
   // Get index from m_joint_index_map. If found, modify out_index and return
@@ -50,6 +50,5 @@ private:
   // Map ow_lander::joint_t enum values to indices in JointState messages
   std::vector<unsigned int> m_joint_state_indices;
 };
-
 
 #endif

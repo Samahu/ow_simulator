@@ -55,8 +55,7 @@ private:
   // param get_height_value: a lambda function to retrive the height value from the heightmap
   // param set_height_value: a lambda function to set back the height value on the heightmap.
   // param merge_method: Choices are keep, replace, add, sub, min, max and avg.
-  static void applyImageToHeightmap(gazebo::rendering::Heightmap* heightmap,
-                                    const cv::Point2i& center, float z_bias,
+  static void applyImageToHeightmap(gazebo::rendering::Heightmap* heightmap, const cv::Point2i& center, float z_bias,
                                     const cv::Mat& image, bool skip_zeros,
                                     const std::function<float(int, int)>& get_height_value,
                                     const std::function<void(int, int, float)>& set_height_value,

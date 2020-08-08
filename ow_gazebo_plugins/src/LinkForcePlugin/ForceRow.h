@@ -17,7 +17,8 @@ public:
     std::stringstream(csvrow[1]) >> m_d;
     std::stringstream(csvrow[2]) >> m_p;
     std::stringstream(csvrow[3]) >> m_rho;
-    for(int i=0; i<6; i++) {
+    for (int i = 0; i < 6; i++)
+    {
       float value;
       std::stringstream(csvrow[4 + i]) >> value;
       m_force_torque.push_back(value);

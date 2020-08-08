@@ -26,7 +26,7 @@ public:
     std::string cell;
 
     m_data.clear();
-    while(std::getline(lineStream, cell, ','))
+    while (std::getline(lineStream, cell, ','))
     {
       m_data.push_back(cell);
     }

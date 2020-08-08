@@ -5,11 +5,10 @@
 #include "ow_faults/FaultInjector.h"
 #include <dynamic_reconfigure/server.h>
 
-
 using namespace std;
 
-
-int main(int argc, char **argv) {
+int main(int argc, char** argv)
+{
   ros::init(argc, argv, "fault");
   ros::NodeHandle node_handle;
 

@@ -12,9 +12,9 @@
 
 // retrieve recorder options from Parameter Server
 // use existing settings in out_options as defaults
-bool get_recorder_options(rosbag::RecorderOptions &out_options);
+bool get_recorder_options(rosbag::RecorderOptions& out_options);
 
 // retrieve topics to be recorded from Parameter Server
-void get_recorder_topics(std::vector<std::string> &out_topics);
+void get_recorder_topics(std::vector<std::string>& out_topics);
 
 #endif /* BAG_RECORDER_CONFIG_H */

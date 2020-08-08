@@ -12,12 +12,12 @@
 
 #include "Cosimulator.h"
 
-namespace gazebo {
-
-// CosimulationPlugin acts as the primary interface between Gazebo and the 
+namespace gazebo
+{
+// CosimulationPlugin acts as the primary interface between Gazebo and the
 // Cosimulator. It is responsbile for closing the loop between Gazebo's physics
-// engine and the cosimulation. It also computes the geometry that Cosimulator 
-// will operate on based on the portion of the scene's heightmap that intersects 
+// engine and the cosimulation. It also computes the geometry that Cosimulator
+// will operate on based on the portion of the scene's heightmap that intersects
 // the workspace box.
 class CosimulationPlugin : public ModelPlugin
 {
@@ -52,7 +52,6 @@ private:
 
 // Register this plugin with the Gazebo
 GZ_REGISTER_MODEL_PLUGIN(CosimulationPlugin)
-
 }
 
-#endif // CosimulationPlugin_h
+#endif  // CosimulationPlugin_h

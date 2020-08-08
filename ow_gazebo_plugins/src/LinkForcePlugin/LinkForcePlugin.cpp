@@ -14,8 +14,7 @@ using namespace std;
 
 GZ_REGISTER_MODEL_PLUGIN(LinkForcePlugin)
 
-LinkForcePlugin::LinkForcePlugin() :
-  ModelPlugin()
+LinkForcePlugin::LinkForcePlugin() : ModelPlugin()
 {
 }
 
@@ -25,22 +24,25 @@ LinkForcePlugin::~LinkForcePlugin()
 
 void LinkForcePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 {
-  if (!_sdf->HasElement("link")) {
+  if (!_sdf->HasElement("link"))
+  {
     gzerr << "Load - you must specify a <link> element." << endl;
     return;
   }
   string linkName = _sdf->Get<string>("link");
   m_link = _model->GetLink(linkName);
-  if(!m_link) {
+  if (!m_link)
+  {
     gzerr << "Load - specified link is invalid." << endl;
     return;
   }
 
-  if (!_sdf->HasElement("lookupTable")) {
+  if (!_sdf->HasElement("lookupTable"))
+  {
     gzerr << "Load - you must specify a filename in a <lookupTable> element." << endl;
     return;
   }
-  if(!LoadLookupTable(_sdf->Get<string>("lookupTable")))
+  if (!LoadLookupTable(_sdf->Get<string>("lookupTable")))
     return;
 
   // Listen to the update event. This event is broadcast every sim iteration.
@@ -51,7 +53,8 @@ void LinkForcePlugin::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf)
 bool LinkForcePlugin::LoadLookupTable(string filename)
 {
   ifstream infile(filename.c_str(), fstream::in);
-  if (!infile.is_open()) {
+  if (!infile.is_open())
+  {
     gzerr << "LoadLookupTable - cannot open file: " << filename << endl;
     return false;
   }
@@ -59,23 +62,25 @@ bool LinkForcePlugin::LoadLookupTable(string filename)
   // Read in force and torque lookup table
   CSVRow row;
   bool first = true;
-  while(infile >> row) {
-    if(first) {
+  while (infile >> row)
+  {
+    if (first)
+    {
       first = false;
       continue;
     }
 
     // Store lookup table row in map
     ForceRow f(row);
-    if(f.m_force_torque.size() != 6) {
-      gzerr << "LoadLookupTable - force/torque vector size = "
-            << f.m_force_torque.size() << ". Should be 6." << endl;
+    if (f.m_force_torque.size() != 6)
+    {
+      gzerr << "LoadLookupTable - force/torque vector size = " << f.m_force_torque.size() << ". Should be 6." << endl;
       continue;
     }
     auto& vec = m_forcesMap[f.m_m][f.m_d][f.m_p][f.m_rho];
-    if(vec.size() != 0) {
-      gzerr << "LoadLookupTable - duplicate key = "
-            << f.m_m << ","<< f.m_d << ","<< f.m_p << ","<< f.m_rho << endl;
+    if (vec.size() != 0)
+    {
+      gzerr << "LoadLookupTable - duplicate key = " << f.m_m << "," << f.m_d << "," << f.m_p << "," << f.m_rho << endl;
       continue;
     }
     vec = f.m_force_torque;
@@ -90,12 +95,14 @@ void LinkForcePlugin::OnUpdate()
   // Get heightmap pointer so we can look up its height values.
   // If we stop using a heightmap for terrain, we will need a new solution for this.
   rendering::ScenePtr scene = rendering::get_scene();
-  if (!scene) {
+  if (!scene)
+  {
     gzerr << "OnUpdate - scene pointer is NULL" << endl;
     return;
   }
   rendering::Heightmap* heightmap = scene->GetHeightmap();
-  if (!heightmap) {
+  if (!heightmap)
+  {
     gzerr << "OnUpdate - heightmap pointer is NULL" << endl;
     return;
   }
@@ -108,7 +115,8 @@ void LinkForcePlugin::OnUpdate()
   // the link touches the surface before its center of gravity touches.
   // TODO: Is this good enough?
   double altitude = cogpose.Pos().Z() - heightmap->Height(cogpose.Pos().X(), cogpose.Pos().Y());
-  if(altitude >= 0) {
+  if (altitude >= 0)
+  {
     return;
   }
 
@@ -117,7 +125,8 @@ void LinkForcePlugin::OnUpdate()
   // TODO: Get proper index for material, maybe depth, pass, and maybe rho.
   // We will likely get them from topics sent by autonomy.
   std::vector<float> forces;
-  if(!GetForces(1, -altitude, 1, 0.0002f, forces)) {
+  if (!GetForces(1, -altitude, 1, 0.0002f, forces))
+  {
     return;
   }
 
@@ -126,10 +135,10 @@ void LinkForcePlugin::OnUpdate()
   m_link->AddRelativeTorque(ignition::math::Vector3d(forces[3], forces[4], forces[5]));
 }
 
-bool LinkForcePlugin::GetForces(int material, float depth, int pass, float rho,
-                                std::vector<float>& out_forces)
+bool LinkForcePlugin::GetForces(int material, float depth, int pass, float rho, std::vector<float>& out_forces)
 {
-  try {
+  try
+  {
     // Find this material
     auto depth_map = m_forcesMap.at(material);
 
@@ -142,19 +151,21 @@ bool LinkForcePlugin::GetForces(int material, float depth, int pass, float rho,
     // Find the nearest forces vector associated with this floating point rho
     auto forces = FindValueForClosestKey(rho_map, rho);
 
-    if(forces.size() != 6) {
-      gzerr << "GetForces - forces vector has size = "
-            << forces.size() << ". It should be 6." << endl;
+    if (forces.size() != 6)
+    {
+      gzerr << "GetForces - forces vector has size = " << forces.size() << ". It should be 6." << endl;
       return false;
     }
 
     out_forces = forces;
   }
-  catch (const std::out_of_range& oor) {
+  catch (const std::out_of_range& oor)
+  {
     gzerr << "GetForces - Out of range exception: " << oor.what() << endl;
     return false;
   }
-  catch ( ... ) {
+  catch (...)
+  {
     gzerr << "GetForces -  Exception thrown." << endl;
     return false;
   }
@@ -169,10 +180,12 @@ value_t LinkForcePlugin::FindValueForClosestKey(const std::map<key_t, value_t>& 
   value_t value = inmap.rbegin()->second;
   // Get lowest match for key, not less than the key
   auto not_less_than_iter = inmap.lower_bound(key);
-  if(not_less_than_iter != inmap.end()) {
-    if(not_less_than_iter == inmap.begin())
+  if (not_less_than_iter != inmap.end())
+  {
+    if (not_less_than_iter == inmap.begin())
       value = not_less_than_iter->second;
-    else {  // Find value if key is in between keys in the map
+    else
+    {  // Find value if key is in between keys in the map
       auto previous_iter = std::prev(not_less_than_iter);
       if ((key - previous_iter->first) < (not_less_than_iter->first - key))
         value = previous_iter->second;

@@ -6,7 +6,7 @@
 //    1) Add in discrete element domain relaxation step before cosimulation
 //       begins (if needed).
 //    2) Transform force and torque to Gazebo's reference frame (if needed).
-//    3) Interpolate between consecutive scoop poses before each call to 
+//    3) Interpolate between consecutive scoop poses before each call to
 //       Cosimulator::update to ensure smooth movement.
 //    4) Implement CropHeightmap
 //    5) Read in parameters in a more OceanWATERS-like way (i.e rosparam yaml?)
@@ -28,8 +28,7 @@ using namespace gazebo;
 
 // Generate a mesh with a +Z-facing geometry that matches the heigthmap and
 // all other sides match the box boundaries
-static common::Mesh CropHeightmap(rendering::Heightmap* heightmap, 
-    ignition::math::OrientedBoxd& box)
+static common::Mesh CropHeightmap(rendering::Heightmap* heightmap, ignition::math::OrientedBoxd& box)
 {
   gzwarn << "CropHeightmap - STUBBED" << std::endl;
 
@@ -38,15 +37,16 @@ static common::Mesh CropHeightmap(rendering::Heightmap* heightmap,
 
 // Convenience function for the Load function SDF parsing
 template <class T>
-static T parseElement(sdf::ElementPtr sdf, const std::string &name) {
-  if (!sdf->HasElement(name)) {
-    gzthrow ("CosimulationPlugin::Load - you must specify a " << name << " element.");
+static T parseElement(sdf::ElementPtr sdf, const std::string& name)
+{
+  if (!sdf->HasElement(name))
+  {
+    gzthrow("CosimulationPlugin::Load - you must specify a " << name << " element.");
   }
   return sdf->Get<T>(name);
 }
 
-CosimulationPlugin::CosimulationPlugin() 
-: ModelPlugin(), m_started(false)
+CosimulationPlugin::CosimulationPlugin() : ModelPlugin(), m_started(false)
 {
 }
 
@@ -58,18 +58,19 @@ void CosimulationPlugin::Load(physics::ModelPtr model, sdf::ElementPtr sdf)
 {
   // SDF parameters
   std::string link_model;
-  double link_youngs_modulus, link_poisson_ratio, link_restitution_coef, 
-      link_friction_static, link_friction_rolling;
-  double part_youngs_modulus, part_poisson_ratio, part_restitution_coef, 
-      part_friction_static, part_friction_rolling, part_density, part_radius;
+  double link_youngs_modulus, link_poisson_ratio, link_restitution_coef, link_friction_static, link_friction_rolling;
+  double part_youngs_modulus, part_poisson_ratio, part_restitution_coef, part_friction_static, part_friction_rolling,
+      part_density, part_radius;
   ignition::math::Vector3d workspace_dimensions;
-  ignition::math::Pose3d workspace_pose; 
+  ignition::math::Pose3d workspace_pose;
 
-  try {
+  try
+  {
     // parse link parameter and save reference
     std::string link_name = parseElement<std::string>(sdf, "link");
     m_link = model->GetLink(link_name);
-    if(!m_link) {
+    if (!m_link)
+    {
       gzerr << "CosimulationPlugin::Load - specified link is invalid." << std::endl;
       return;
     }
@@ -92,24 +93,26 @@ void CosimulationPlugin::Load(physics::ModelPtr model, sdf::ElementPtr sdf)
     part_radius = parseElement<double>(sdf, "particle_radius");
     // workspace parameters
     workspace_dimensions = parseElement<ignition::math::Vector3d>(sdf, "workspace_dimensions");
-    workspace_pose = parseElement<ignition::math::Pose3d>(sdf, "workspace_pose");  
+    workspace_pose = parseElement<ignition::math::Pose3d>(sdf, "workspace_pose");
     // Cosimulation timestep parameter
     m_timestep = parseElement<double>(sdf, "timestep");
-  } catch (common::Exception err) {
+  }
+  catch (common::Exception err)
+  {
     // TODO: print this exception to gzerr
     return;
   }
 
   gzmsg << "CosimulationPlugin::Load - Initializing cosimulation..." << std::endl;
   // pass material properties from the SDF configuration
-  m_cosim.setToolProperties(link_youngs_modulus, link_poisson_ratio,
-      link_restitution_coef, link_friction_static, link_friction_rolling);
-  m_cosim.setParticleProperties(part_youngs_modulus, part_poisson_ratio, 
-      part_restitution_coef, part_friction_static, part_friction_rolling, 
-      part_density, part_radius);
+  m_cosim.setToolProperties(link_youngs_modulus, link_poisson_ratio, link_restitution_coef, link_friction_static,
+                            link_friction_rolling);
+  m_cosim.setParticleProperties(part_youngs_modulus, part_poisson_ratio, part_restitution_coef, part_friction_static,
+                                part_friction_rolling, part_density, part_radius);
   // get world pointer
   m_world = physics::get_world();
-  if (!m_world) {
+  if (!m_world)
+  {
     gzerr << "CosimulationPlugin::Load - world pointer is NULL" << std::endl;
     return;
   }
@@ -122,21 +125,22 @@ void CosimulationPlugin::Load(physics::ModelPtr model, sdf::ElementPtr sdf)
   m_workspace_box.Pose(workspace_pose);
   // get heightmap and pass it to the cosimulation as a cropped heightmap
   rendering::ScenePtr scene = rendering::get_scene();
-  if (!scene) {
+  if (!scene)
+  {
     gzerr << "CosimulationPlugin::Load - scene pointer is NULL" << std::endl;
     return;
   }
   rendering::Heightmap* heightmap = scene->GetHeightmap();
-  if (!heightmap) {
+  if (!heightmap)
+  {
     gzerr << "CosimulationPlugin::Load - heightmap pointer is NULL" << std::endl;
-    return;  
+    return;
   }
   m_cosim.setParticleFillGeometry(CropHeightmap(heightmap, m_workspace_box));
 
   m_cosim.initialize();
 
-  m_phys_connect = event::Events::ConnectBeforePhysicsUpdate(
-      std::bind(&CosimulationPlugin::OnUpdate, this));
+  m_phys_connect = event::Events::ConnectBeforePhysicsUpdate(std::bind(&CosimulationPlugin::OnUpdate, this));
 }
 
 void CosimulationPlugin::OnUpdate(void)
@@ -145,10 +149,13 @@ void CosimulationPlugin::OnUpdate(void)
   //       CoG here works fine.
   ignition::math::Pose3d link_pose = m_link->WorldCoGPose();
 
-  if (m_workspace_box.Contains(link_pose.Pos()) == false) {
-    // ignore this call if link is not within workspace yet  
+  if (m_workspace_box.Contains(link_pose.Pos()) == false)
+  {
+    // ignore this call if link is not within workspace yet
     return;
-  } else if (m_started == false) {
+  }
+  else if (m_started == false)
+  {
     // record time when link first enters workspace
     m_started = true;
     m_starttime = m_world->SimTime().Double();
@@ -162,14 +169,16 @@ void CosimulationPlugin::OnUpdate(void)
   double elapsed = 0.0;
   // catch cosimulation up to Gazebo simulation
   // FIXME: m_starttime should be used in here for comparing cosim time and gz_time
-  while(m_cosim.getSimTime() <= gz_time) {
+  while (m_cosim.getSimTime() <= gz_time)
+  {
     // cosim update function output variables
     ignition::math::Vector3d out_force;
     ignition::math::Vector3d out_torque;
     // select timestep
     // NOTE: remainder calculation allows both simulations to sync their clocks
     double remainder = gz_time - (m_cosim.getSimTime() + m_timestep);
-    if (remainder == 0.0) {
+    if (remainder == 0.0)
+    {
       break;
     }
     double timestep = std::min(remainder, m_timestep);
@@ -181,7 +190,8 @@ void CosimulationPlugin::OnUpdate(void)
     elapsed += timestep;
   }
   // calculate time averaged force and torque from impulses
-  if (elapsed <= 0.0) {
+  if (elapsed <= 0.0)
+  {
     gzerr << "CosimulationPlugin::OnUpdate - Cosimulation elapsed time <= 0" << std::endl;
     return;
   }

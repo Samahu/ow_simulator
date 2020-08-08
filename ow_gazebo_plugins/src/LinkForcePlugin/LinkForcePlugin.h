@@ -8,9 +8,8 @@
 #include <gazebo/common/Plugin.hh>
 #include "ForceRow.h"
 
-
-namespace gazebo {
-
+namespace gazebo
+{
 // This plugin is added to a robot description and applies forces from a
 // specified lookup table to a specified link in the robot.
 class LinkForcePlugin : public ModelPlugin
@@ -18,7 +17,7 @@ class LinkForcePlugin : public ModelPlugin
 public:
   LinkForcePlugin();
   ~LinkForcePlugin();
-    
+
   virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
 
 private:
@@ -26,8 +25,7 @@ private:
 
   void OnUpdate();
 
-  bool GetForces(int material, float depth, int pass, float rho,
-                 std::vector<float>& out_forces);
+  bool GetForces(int material, float depth, int pass, float rho, std::vector<float>& out_forces);
 
   // Find a value in a map when there is not necessarily an exact match for the key
   template <typename key_t, typename value_t>
@@ -40,7 +38,6 @@ private:
 
   std::map<int, std::map<float, std::map<int, std::map<float, std::vector<float> > > > > m_forcesMap;
 };
-
 }
 
-#endif // LinkForcePlugin_h
+#endif  // LinkForcePlugin_h

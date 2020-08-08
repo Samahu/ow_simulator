@@ -26,7 +26,7 @@ TEST(TestMergeMethods, invokeIndirectly)
 {
   const float n1 = 2.0f;
   const float n2 = 3.0f;
-  
+
   auto merge_method = boost::optional<const MergeMethods::MergeMethod&>();
   ASSERT_FALSE(merge_method);
 
@@ -65,7 +65,7 @@ TEST(TestMergeMethods, mergeMethodFromString_InvalidMethodName)
 }
 
 // Run all the tests that were declared with TEST()
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

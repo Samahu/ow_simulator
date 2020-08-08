@@ -15,7 +15,7 @@ Mat TerrainBrush::circle(float outer_radius, float inner_radius, float weight)
   auto center = Point2i(i_outer_radius, i_outer_radius);  // center with respect to the image.
   auto result = Mat(2 * i_outer_radius, 2 * i_outer_radius, CV_32FC1);
 
-  result.forEach<float>([=, &center](float &pixel_value, const int pixel_index[]) {
+  result.forEach<float>([=, &center](float& pixel_value, const int pixel_index[]) {
     auto dx = pixel_index[1] - center.x;
     auto dy = pixel_index[0] - center.y;
     auto dist = sqrtf(dx * dx + dy * dy);
@@ -49,7 +49,7 @@ Mat TerrainBrush::ellipse(float outer_radius_a, float inner_radius_a, float oute
   auto inner_radius_a_sq = inner_radius_a * inner_radius_a;
   auto inner_radius_b_sq = inner_radius_b * inner_radius_b;
 
-  result.forEach<float>([=, &center](float &pixel_value, const int pixel_index[]) {
+  result.forEach<float>([=, &center](float& pixel_value, const int pixel_index[]) {
     auto dx = pixel_index[1] - center.x;
     auto dy = pixel_index[0] - center.y;
     auto inner_dist_sq = inner_radius_b_sq * dx * dx + inner_radius_a_sq * dy * dy;

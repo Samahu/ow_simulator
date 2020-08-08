@@ -12,7 +12,7 @@
 
 #include "config.h"
 
-int main(int argc, char* argv[]) 
+int main(int argc, char* argv[])
 {
   ros::init(argc, argv, "bag_recorder_node");
   ros::NodeHandle nh("bag_recorder_node");
@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     get_recorder_topics(recorder_options.topics);
 
   rosbag::Recorder recorder(recorder_options);
- 
+
   ROS_INFO("Bag recorder node is running");
 
   return recorder.run();
